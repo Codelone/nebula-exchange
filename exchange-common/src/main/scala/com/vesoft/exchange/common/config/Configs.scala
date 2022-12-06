@@ -12,6 +12,7 @@ import com.google.common.net.HostAndPort
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.exchange.Argument
 import com.vesoft.exchange.common.KeyPolicy
+import com.vesoft.exchange.common.utils.EncryptUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, FileSystem, Path}
 import org.apache.log4j.Logger
@@ -289,8 +290,16 @@ object Configs {
     val enableTagless = getOrElse(nebulaConfig, "enableTagless", false)
     LOG.info(s"DataBase Config ${databaseEntry}")
 
+    val secretKey = getOrElse(nebulaConfig, "secretKey", "")
+    val isEncrypt = getOrElse(nebulaConfig, "isEncrypt", false)
     val user      = nebulaConfig.getString("user")
-    val pswd      = nebulaConfig.getString("pswd")
+    val pswd      = if (isEncrypt) {
+      // 解密
+      EncryptUtils.decode(secretKey,nebulaConfig.getString("pswd"))
+    } else {
+      nebulaConfig.getString("pswd")
+    }
+
     val userEntry = UserConfigEntry(user, pswd)
     LOG.info(s"User Config ${userEntry}")
 
