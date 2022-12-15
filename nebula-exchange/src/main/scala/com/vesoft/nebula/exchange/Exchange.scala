@@ -30,11 +30,9 @@ import com.vesoft.nebula.exchange.reader.{
   HBaseReader,
   HiveReader,
   JSONReader,
-  JanusGraphReader,
   KafkaReader,
   MaxcomputeReader,
   MySQLReader,
-  Neo4JReader,
   ORCReader,
   ParquetReader,
   PulsarReader
@@ -72,6 +70,7 @@ object Exchange {
 
     val session = SparkSession
       .builder()
+      .master("local[2]")
       .appName(PROGRAM_NAME)
       .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 
@@ -263,11 +262,6 @@ object Exchange {
         val reader = new KafkaReader(session, kafkaConfig)
         Some(reader.read())
       }
-      case SourceCategory.NEO4J =>
-        val neo4jConfig = config.asInstanceOf[Neo4JSourceConfigEntry]
-        LOG.info(s"Loading from neo4j config: ${neo4jConfig}")
-        val reader = new Neo4JReader(session, neo4jConfig)
-        Some(reader.read())
       case SourceCategory.MYSQL =>
         val mysqlConfig = config.asInstanceOf[MySQLSourceConfigEntry]
         LOG.info(s"Loading from mysql config: ${mysqlConfig}")
@@ -277,10 +271,6 @@ object Exchange {
         val pulsarConfig = config.asInstanceOf[PulsarSourceConfigEntry]
         LOG.info(s"Loading from pulsar config: ${pulsarConfig}")
         val reader = new PulsarReader(session, pulsarConfig)
-        Some(reader.read())
-      case SourceCategory.JANUS_GRAPH =>
-        val janusGraphSourceConfigEntry = config.asInstanceOf[JanusGraphSourceConfigEntry]
-        val reader                      = new JanusGraphReader(session, janusGraphSourceConfigEntry)
         Some(reader.read())
       case SourceCategory.HBASE =>
         val hbaseSourceConfigEntry = config.asInstanceOf[HBaseSourceConfigEntry]

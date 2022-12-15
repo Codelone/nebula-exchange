@@ -10,22 +10,8 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import com.vesoft.nebula.client.graph.data.HostAddress
 import com.vesoft.nebula.encoder.NebulaCodecImpl
-import com.vesoft.nebula.exchange.{
-  ErrorHandler,
-  GraphProvider,
-  KeyPolicy,
-  MetaProvider,
-  Vertex,
-  Vertices,
-  VidType
-}
-import com.vesoft.nebula.exchange.config.{
-  Configs,
-  FileBaseSinkConfigEntry,
-  SinkCategory,
-  StreamingDataSourceConfigEntry,
-  TagConfigEntry
-}
+import com.vesoft.nebula.exchange.{ErrorHandler, GraphProvider, KeyPolicy, MetaProvider, Vertex, Vertices, VidType}
+import com.vesoft.nebula.exchange.config.{Configs, FileBaseSinkConfigEntry, SinkCategory, StreamingDataSourceConfigEntry, TagConfigEntry}
 import com.vesoft.nebula.exchange.utils.NebulaUtils.DEFAULT_EMPTY_VALUE
 import com.vesoft.nebula.exchange.utils.{HDFSUtils, NebulaUtils}
 import com.vesoft.nebula.exchange.writer.{NebulaGraphClientWriter, NebulaSSTWriter}
@@ -33,7 +19,7 @@ import org.apache.commons.codec.digest.MurmurHash2
 import org.apache.log4j.Logger
 import org.apache.spark.TaskContext
 import org.apache.spark.sql.streaming.Trigger
-import org.apache.spark.sql.{DataFrame, Encoders, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row}
 import org.apache.spark.util.LongAccumulator
 
 import scala.collection.JavaConverters._
@@ -265,7 +251,7 @@ class VerticesProcessor(data: DataFrame,
         val streamingDataSourceConfig =
           tagConfig.dataSourceConfigEntry.asInstanceOf[StreamingDataSourceConfigEntry]
         vertices.writeStream
-          .foreachBatch((vertexSet, batchId) => {
+          .foreachBatch((vertexSet: Dataset[Vertex], batchId: Long) => {
             LOG.info(s"${tagConfig.name} tag start batch ${batchId}.")
             vertexSet.foreachPartition(processEachPartition _)
           })

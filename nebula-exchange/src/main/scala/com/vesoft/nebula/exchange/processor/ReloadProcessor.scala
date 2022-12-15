@@ -24,7 +24,7 @@ class ReloadProcessor(data: DataFrame,
   private[this] lazy val LOG = Logger.getLogger(this.getClass)
 
   override def process(): Unit = {
-    data.foreachPartition(processEachPartition(_))
+    data.foreachPartition((rows: Iterator[Row]) => processEachPartition(rows))
   }
 
   private def processEachPartition(iterator: Iterator[Row]): Unit = {

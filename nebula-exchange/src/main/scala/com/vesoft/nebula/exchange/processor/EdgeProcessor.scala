@@ -11,30 +11,16 @@ import java.nio.file.{Files, Paths}
 import com.google.common.geometry.{S2CellId, S2LatLng}
 import com.vesoft.nebula.client.graph.data.HostAddress
 import com.vesoft.nebula.encoder.NebulaCodecImpl
-import com.vesoft.nebula.exchange.config.{
-  Configs,
-  EdgeConfigEntry,
-  FileBaseSinkConfigEntry,
-  SinkCategory,
-  StreamingDataSourceConfigEntry
-}
+import com.vesoft.nebula.exchange.config.{Configs, EdgeConfigEntry, FileBaseSinkConfigEntry, SinkCategory, StreamingDataSourceConfigEntry}
 import com.vesoft.nebula.exchange.utils.NebulaUtils.DEFAULT_EMPTY_VALUE
 import com.vesoft.nebula.exchange.utils.{HDFSUtils, NebulaUtils}
-import com.vesoft.nebula.exchange.{
-  Edge,
-  Edges,
-  ErrorHandler,
-  GraphProvider,
-  KeyPolicy,
-  MetaProvider,
-  VidType
-}
+import com.vesoft.nebula.exchange.{Edge, Edges, ErrorHandler, GraphProvider, KeyPolicy, MetaProvider, VidType}
 import org.apache.log4j.Logger
 import com.vesoft.nebula.exchange.writer.{NebulaGraphClientWriter, NebulaSSTWriter}
 import org.apache.commons.codec.digest.MurmurHash2
 import org.apache.spark.TaskContext
 import org.apache.spark.sql.streaming.Trigger
-import org.apache.spark.sql.{DataFrame, Encoders, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row}
 import org.apache.spark.util.LongAccumulator
 
 import scala.collection.JavaConverters._
@@ -339,7 +325,7 @@ class EdgeProcessor(data: DataFrame,
         val streamingDataSourceConfig =
           edgeConfig.dataSourceConfigEntry.asInstanceOf[StreamingDataSourceConfigEntry]
         edgeFrame.writeStream
-          .foreachBatch((edges, batchId) => {
+          .foreachBatch((edges: Dataset[Edge], batchId: Long) => {
             LOG.info(s"${edgeConfig.name} edge start batch ${batchId}.")
             edges.foreachPartition(processEachPartition _)
           })
