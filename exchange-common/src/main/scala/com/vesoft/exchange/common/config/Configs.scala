@@ -636,13 +636,13 @@ object Configs {
                                      paths: Map[String,String]): DataSourceConfigEntry = {
     category match {
       case SourceCategory.PARQUET =>
-        if (variable) FileBaseSourceConfigEntry(SourceCategory.PARQUET, paths(config.getString("path")))
+        if (variable) FileBaseSourceConfigEntry(SourceCategory.PARQUET, if (paths.contains(config.getString("path"))) paths(config.getString("path")) else config.getString("path"))
         else FileBaseSourceConfigEntry(SourceCategory.PARQUET, config.getString("path"))
       case SourceCategory.ORC =>
-        if (variable) FileBaseSourceConfigEntry(SourceCategory.ORC, paths(config.getString("path")))
+        if (variable) FileBaseSourceConfigEntry(SourceCategory.ORC, if (paths.contains(config.getString("path"))) paths(config.getString("path")) else config.getString("path"))
         else FileBaseSourceConfigEntry(SourceCategory.ORC, config.getString("path"))
       case SourceCategory.JSON =>
-        if (variable) FileBaseSourceConfigEntry(SourceCategory.JSON, paths(config.getString("path")))
+        if (variable) FileBaseSourceConfigEntry(SourceCategory.JSON, if (paths.contains(config.getString("path"))) paths(config.getString("path")) else config.getString("path"))
         else FileBaseSourceConfigEntry(SourceCategory.JSON, config.getString("path"))
       case SourceCategory.CSV =>
         val separator =
@@ -656,7 +656,7 @@ object Configs {
             false
         if (variable)
           FileBaseSourceConfigEntry(SourceCategory.CSV,
-            paths(config.getString("path")),
+            if (paths.contains(config.getString("path"))) paths(config.getString("path")) else config.getString("path"),
             Some(separator),
             Some(header))
         else
